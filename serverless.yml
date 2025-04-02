@@ -1,0 +1,35 @@
+service: smartthings-tado-shm
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  memorySize: 128
+  timeout: 60
+  environment:
+    APP_ID: ${param:appId}
+    CLIENT_ID: ${param:clientId}
+    CLIENT_SECRET: ${param:clientSecret}
+    MOBILE_NUMBER: ${param:mobileNumber}
+  iam:
+    role:
+      statements:
+      - Effect: Allow
+        Action:
+          - 'ssm:GetParameter'
+          - 'ssm:PutParameter'
+        Resource:
+          - 'arn:aws:ssm:${self:provider.region}:${aws:accountId}:parameter/smartthings-tado/refresh-token'
+      - Effect: Allow
+        Action:
+          - 'sns:Publish'
+        Resource:
+          - '*'
+          
+functions:
+  handler:
+    handler: handler.handle
+
+plugins:
+  - serverless-plugin-typescript
